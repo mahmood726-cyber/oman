@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oman Evidence OS | v39.0 Comprehensive</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['Playfair Display', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        void: '#09090b',
+                        paper: '#18181b',
+                        accent: {
+                            teal: '#2dd4bf',
+                            gold: '#fbbf24',
+                            rose: '#fb7185',
+                            blue: '#60a5fa',
+                            green: '#4ade80'
+                        }
+                    },
+                    boxShadow: {
+                        'glow': '0 0 40px -10px rgba(45, 212, 191, 0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base Theme */
+        html.dark body { background-color: #09090b; color: #e4e4e7; }
+        html.dark .glass-panel { background: rgba(24, 24, 27, 0.8); backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        
+        html.light body { background-color: #f8fafc; color: #0f172a; }
+        html.light .glass-panel { background: rgba(255, 255, 255, 0.95); border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        html.light .text-white { color: #0f172a; }
+        html.light .text-zinc-400 { color: #64748b; }
+        html.light input { color: #0f172a; border-bottom: 1px solid #cbd5e1; }
+        html.light .border-white\/5 { border-color: rgba(0,0,0,0.1); }
+        html.light .bg-zinc-900 { background-color: #f1f5f9; }
+
+        .tab-content { display: none; animation: fadeUp 0.3s ease-out; }
+        .tab-content.active { display: block; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        input { background: transparent; font-family: 'JetBrains Mono', monospace; outline: none; transition: border 0.2s; }
+        input:focus { border-color: #2dd4bf; }
+        
+        .active-card { border-color: #2dd4bf !important; background-color: rgba(45, 212, 191, 0.05); }
+        html.light .active-card { background-color: rgba(45, 212, 191, 0.1); }
+
+        .scatter-point { transition: fill 0.3s ease; mix-blend-mode: screen; }
+        html.light .scatter-point { mix-blend-mode: multiply; }
+        .scatter-point:hover { transform: scale(2); opacity: 1; stroke: currentColor; }
+
+        .loader { width: 20px; height: 20px; border: 2px solid currentColor; border-bottom-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .nyt-header { font-family: 'Playfair Display', serif; letter-spacing: -0.02em; }
+        .nyt-body { font-family: 'Inter', sans-serif; line-height: 1.6; }
+    </style>
+</head>
+<body class="antialiased selection:bg-accent-teal/30 selection:text-black min-h-screen flex flex-col transition-colors duration-300">
+
+    <!-- NAV -->
+    <nav class="fixed top-0 w-full z-50 glass-panel border-b-0 transition-colors duration-300">
+        <div class="max-w-[1400px] mx-auto px-6 h-20 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-gradient-to-br from-accent-teal to-blue-900 rounded flex items-center justify-center text-white font-bold text-lg shadow-lg">M</div>
+                <div class="flex flex-col">
+                    <span class="font-serif text-white font-bold tracking-wide text-sm leading-none dark:text-white text-slate-900">Evidence<span class="text-accent-teal">OS</span></span>
+                    <span class="text-[9px] font-mono uppercase tracking-[0.2em] text-zinc-500">v39.0 Comprehensive</span>
+                </div>
+            </div>
+            
+            <div class="flex gap-1 bg-zinc-900/50 p-1 rounded-lg border border-white/5 dark:bg-zinc-900/50 bg-slate-200/50">
+                <button onclick="switchTab('strategy')" id="nav-strategy" class="nav-item px-4 py-1.5 text-[10px] font-mono uppercase tracking-widest rounded transition-all">Strategy</button>
+                <button onclick="switchTab('synthesis')" id="nav-synthesis" class="nav-item px-4 py-1.5 text-[10px] font-mono uppercase tracking-widest rounded transition-all">NMA</button>
+                <button onclick="switchTab('economics')" id="nav-economics" class="nav-item px-4 py-1.5 text-[10px] font-mono uppercase tracking-widest rounded transition-all">HTA</button>
+                <button onclick="switchTab('horizon')" id="nav-horizon" class="nav-item px-4 py-1.5 text-[10px] font-mono uppercase tracking-widest rounded transition-all flex items-center gap-2"><span class="w-1.5 h-1.5 bg-accent-green rounded-full"></span> Horizon</button>
+                <button onclick="switchTab('data')" id="nav-data" class="nav-item px-4 py-1.5 text-[10px] font-mono uppercase tracking-widest rounded transition-all border-l border-white/10 ml-1">Data</button>
+            </div>
+            
+            <button onclick="App.ui.toggleTheme()" class="p-2 text-zinc-400 hover:text-white rounded transition-colors" title="Toggle Theme">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            </button>
+        </div>
+    </nav>
+
+    <main class="flex-1 pt-24 pb-20 max-w-[1400px] mx-auto px-6 w-full">
+
+        <!-- TAB 1: STRATEGY -->
+        <div id="view-strategy" class="tab-content active space-y-12">
+            <header class="text-center py-10">
+                <div class="inline-block px-3 py-1 mb-4 rounded border border-white/10 bg-white/5 text-[10px] font-mono uppercase tracking-widest text-zinc-400">National Health Intelligence</div>
+                <h1 class="text-5xl md:text-6xl font-serif text-white mb-6 nyt-header dark:text-white text-slate-900">The Omani Context</h1>
+                <p class="text-zinc-400 max-w-3xl mx-auto text-lg font-light leading-relaxed nyt-body">
+                    Global evidence cannot be copy-pasted. Oman's unique genetic haplotypes and specific healthcare infrastructure require <strong>precision adaptation</strong> of international evidence.
+                </p>
+            </header>
+
+            <div class="grid md:grid-cols-4 gap-4">
+                <button onclick="setTopic('sickle')" id="card-sickle" class="glass-panel p-6 rounded-xl cursor-pointer transition-all group active-card text-left w-full focus:outline-none">
+                    <div class="text-[10px] font-mono text-accent-rose uppercase tracking-widest mb-2">Genetics</div>
+                    <h3 class="text-xl font-serif dark:text-white text-slate-900">Sickle Cell</h3>
+                </button>
+                <button onclick="setTopic('diabetes')" id="card-diabetes" class="glass-panel p-6 rounded-xl cursor-pointer border border-transparent hover:border-accent-teal transition-all group text-left w-full focus:outline-none">
+                    <div class="text-[10px] font-mono text-accent-teal uppercase tracking-widest mb-2">Metabolic</div>
+                    <h3 class="text-xl font-serif dark:text-white text-slate-900">Diabetes T2</h3>
+                </button>
+                <button onclick="setTopic('cardio')" id="card-cardio" class="glass-panel p-6 rounded-xl cursor-pointer border border-transparent hover:border-accent-gold transition-all group text-left w-full focus:outline-none">
+                    <div class="text-[10px] font-mono text-accent-gold uppercase tracking-widest mb-2">Cardio</div>
+                    <h3 class="text-xl font-serif dark:text-white text-slate-900">Prevention</h3>
+                </button>
+                <button onclick="setTopic('trauma')" id="card-trauma" class="glass-panel p-6 rounded-xl cursor-pointer border border-transparent hover:border-accent-blue transition-all group text-left w-full focus:outline-none">
+                    <div class="text-[10px] font-mono text-accent-blue uppercase tracking-widest mb-2">Public Health</div>
+                    <h3 class="text-xl font-serif dark:text-white text-slate-900">Trauma</h3>
+                </button>
+            </div>
+
+            <!-- Context Dashboard -->
+            <div class="glass-panel rounded-xl overflow-hidden border-t border-white/10 transition-all duration-300" id="strategy-context">
+                <div class="grid md:grid-cols-12 gap-0">
+                    <div class="md:col-span-8 p-10 space-y-6 border-r border-white/5">
+                        <h2 class="text-4xl font-serif dark:text-white text-slate-900 nyt-header" id="ctx-title">--</h2>
+                        <div id="ctx-desc" class="space-y-4"></div>
+                        <div class="flex items-center gap-6 pt-4">
+                            <button onclick="switchTab('synthesis')" class="px-8 py-3 bg-zinc-100 hover:bg-white text-black text-xs font-bold uppercase tracking-widest rounded transition-colors shadow-lg shadow-white/10">Analyze Evidence →</button>
+                            <div class="text-xs font-mono text-zinc-500">Source: <span id="nma-source">--</span></div>
+                        </div>
+                    </div>
+                    <div class="md:col-span-4 bg-zinc-900/30 p-10 flex flex-col justify-center space-y-8 dark:bg-zinc-900/30 bg-slate-200/50">
+                        <div><div class="text-[10px] text-zinc-500 uppercase tracking-widest mb-1" id="lbl-stat1">--</div><div class="text-3xl font-serif dark:text-white text-slate-900" id="ctx-stat1">--</div></div>
+                        <div class="w-full h-px bg-current opacity-10"></div>
+                        <div><div class="text-[10px] text-zinc-500 uppercase tracking-widest mb-1" id="lbl-stat2">--</div><div class="text-3xl font-serif dark:text-white text-slate-900" id="ctx-stat2">--</div></div>
+                        <div class="w-full h-px bg-current opacity-10"></div>
+                        <div><div class="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">2040 Forecast</div><div class="text-xs text-zinc-400 leading-relaxed" id="ctx-forecast">--</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. NMA -->
+        <div id="view-synthesis" class="tab-content space-y-8">
+            <header class="border-l-2 border-accent-teal pl-6">
+                <h1 class="text-3xl font-serif dark:text-white text-slate-900 mb-2">Network Meta-Analysis</h1>
+                <p class="text-sm text-zinc-400"><strong class="text-accent-teal">Frequentist NMA:</strong> Inverse-variance network synthesis with P-score ranking (CT.gov serious AE outcome).</p>
+            </header>
+
+            <div class="glass-panel rounded-xl overflow-hidden p-8">
+                <div class="mb-6 flex justify-between items-end">
+                    <h3 class="font-serif text-white text-lg dark:text-white text-slate-900">Comparative League Table (Odds Ratio)</h3>
+                    <div class="text-right">
+                        <div class="text-[10px] font-mono text-zinc-500 uppercase">Values < 1 Favor Row Treatment</div>
+                    </div>
+                </div>
+                <div id="nma-grid" class="grid grid-cols-5 gap-px bg-zinc-800 border border-zinc-800 text-center text-xs font-mono"></div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="glass-panel p-6 rounded-xl">
+                    <h3 class="font-serif dark:text-white text-slate-900 mb-6">P-score Ranking</h3>
+                    <div id="sucra-container" class="space-y-4"></div>
+                </div>
+                <div class="glass-panel p-6 rounded-xl flex flex-col justify-center bg-zinc-900/30 dark:bg-zinc-900/30 bg-slate-100">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="text-lg">📘</span>
+                        <h4 class="text-[10px] font-bold dark:text-white text-slate-900 uppercase tracking-widest">Methodology Note</h4>
+                    </div>
+                    <p class="text-xs text-zinc-400 leading-relaxed mb-3 nyt-body">
+                        <strong>Indirect Comparison:</strong> Network synthesis borrows strength across a common comparator when head-to-head data are missing.
+                    </p>
+                    <p class="text-xs text-zinc-400 leading-relaxed nyt-body">
+                        <strong>Endpoint:</strong> Serious adverse events reported on ClinicalTrials.gov results.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. HTA -->
+        <div id="view-economics" class="tab-content space-y-8">
+            <header class="flex justify-between items-end border-b border-white/10 pb-6">
+                <div>
+                    <h1 class="text-3xl font-serif dark:text-white text-slate-900 mb-2">Economic Model</h1>
+                    <p class="text-xs font-mono text-zinc-500 uppercase">10-Year Markov Trace • Seeded Monte Carlo PSA (10k)</p>
+                </div>
+                <button onclick="App.engine.runSimulation()" class="px-6 py-2 bg-accent-gold text-black font-bold font-mono text-xs uppercase tracking-widest rounded hover:bg-white transition-colors shadow-lg">Run Monte Carlo</button>
+            </header>
+
+            <div class="grid md:grid-cols-12 gap-8">
+                <div class="md:col-span-8">
+                    <div class="glass-panel p-6 rounded-xl h-[500px] relative">
+                        <svg id="hta-plot" viewBox="0 0 600 400" class="w-full h-full"></svg>
+                    </div>
+                </div>
+                <div class="md:col-span-4 space-y-4">
+                    <div class="p-6 bg-zinc-900/50 rounded border border-white/10">
+                        <div class="text-[10px] uppercase tracking-widest text-zinc-500 mb-1">Mean ICER</div>
+                        <div id="icer-val" class="text-3xl font-mono text-accent-rose">--</div>
+                        <div class="text-[9px] text-zinc-600 mt-1">OMR per QALY</div>
+                    </div>
+                    <div class="p-6 bg-zinc-900/50 rounded border border-white/10">
+                        <div class="text-[10px] uppercase tracking-widest text-zinc-500 mb-1">Net Monetary Benefit</div>
+                        <div id="nmb-val" class="text-2xl font-mono text-zinc-400">--</div>
+                    </div>
+                    <div class="p-6 bg-zinc-900/50 rounded border border-accent-blue/20">
+                        <div class="text-[10px] uppercase tracking-widest text-accent-blue mb-1">EVPI (Pop. Value)</div>
+                        <div id="evpi-val" class="text-2xl font-mono dark:text-white text-slate-900">--</div>
+                    </div>
+                    <div class="p-5 rounded border border-white/10 bg-zinc-900/80">
+                        <h4 class="text-[10px] font-bold dark:text-white text-slate-900 uppercase tracking-widest mb-2">Executive Summary</h4>
+                        <p class="text-xs text-zinc-400 leading-relaxed font-serif italic" id="hta-narrative">Simulating...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. HORIZON -->
+        <div id="view-horizon" class="tab-content space-y-8">
+            <header class="border-b border-white/10 pb-6">
+                <h1 class="text-3xl font-serif dark:text-white text-slate-900 mb-2">Horizon Scanner</h1>
+                <p class="text-xs font-mono text-zinc-500 uppercase">ClinicalTrials.gov V2 API • <a href="https://clinicaltrials.gov/api/v2/" target="_blank" rel="noopener" class="text-accent-green hover:underline">API Docs</a></p>
+            </header>
+            <div class="glass-panel p-4 rounded-xl flex gap-4">
+                <input type="text" id="scan-query" value="Sickle Cell" class="flex-1 bg-transparent border-b border-zinc-700 text-sm font-mono px-4 py-2 focus:border-accent-green" placeholder="Search condition...">
+                <button onclick="window.fetchTrials()" class="px-6 py-2 bg-zinc-800 text-white text-xs font-bold uppercase tracking-widest rounded hover:bg-zinc-700">Scan</button>
+            </div>
+            <div id="scan-results" class="grid md:grid-cols-2 gap-4 min-h-[200px]">
+                <div class="md:col-span-2 text-center py-20 text-xs font-mono text-zinc-600">Ready to scan...</div>
+            </div>
+        </div>
+
+        <!-- 5. DATA STUDIO -->
+        <div id="view-data" class="tab-content space-y-8">
+            <header class="flex justify-between items-end border-b border-white/10 pb-6">
+                <div>
+                    <h1 class="text-3xl font-serif dark:text-white text-slate-900 mb-2">Evidence Engine</h1>
+                    <p class="text-xs font-mono text-zinc-500 uppercase">RCT Aggregation & Meta-Analysis</p>
+                </div>
+                <button onclick="App.store.reset()" class="text-[10px] font-mono text-accent-rose hover:underline">Reset</button>
+            </header>
+            <div class="grid md:grid-cols-12 gap-8">
+                <div class="md:col-span-8 space-y-6" id="trial-list-container"></div>
+                <div class="md:col-span-4 space-y-6">
+                    <div class="glass-panel p-6 rounded-xl sticky top-24">
+                        <h3 class="text-xs font-bold text-accent-gold uppercase tracking-widest mb-4">Economic Inputs</h3>
+                        <div id="global-params" class="space-y-4"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- WORKER SCRIPT -->
+    <script id="worker-code" type="javascript/worker">
+        self.onmessage = function(e) {
+            const { type, payload } = e.data;
+            if (type === 'RUN_SIMULATION') {
+                const results = runAdvancedPSA(payload);
+                self.postMessage({ type: 'SIMULATION_COMPLETE', results });
+            }
+        };
+
+        function mulberry32(a) { return function() { var t = a += 0x6D2B79F5; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; } }
+        const rng = mulberry32(12345);
+
+        const Dist = {
+            randn: () => { const u1 = Math.max(1e-12, rng()); const u2 = rng(); return Math.sqrt(-2.0 * Math.log(u1)) * Math.sin(2.0 * Math.PI * u2); },
+            gamma: (mean, se) => { if (se <= 0 || mean <= 0) return Math.max(0, mean); const v = se*se; const k = (mean*mean)/v; const t = v/mean; const z = Dist.randn(); const val = k * Math.pow(1 - (1/(9*k)) + (z * Math.sqrt(1/(9*k))), 3); return Math.max(0, val*t); },
+            beta: (mean, se) => { if (se <= 0) return mean; const v = se*se; const m = Math.max(0.001, Math.min(0.999, mean)); const a = m*((m*(1-m)/v)-1); const b = (1-m)*((m*(1-m)/v)-1); if(a<=0) return mean; const ga = Dist.gamma(a, Math.sqrt(a)); const gb = Dist.gamma(b, Math.sqrt(b)); return ga/(ga+gb); }
+        };
+
+        function runMarkovTrace(params) {
+            const { costAnnual, costEvent, utilState, probEvent, probDeath, discount } = params;
+            let totalCost = 0; let totalQALY = 0; let stateHealth = 1.0; let stateDead = 0.0;
+            for (let year = 0; year < 10; year++) {
+                const discFactor = 1 / Math.pow(1 + discount, year);
+                const died = stateHealth * probDeath;
+                const hadEvent = stateHealth * probEvent; 
+                const cycleCost = (stateHealth * costAnnual) + (hadEvent * costEvent);
+                const cycleUtil = (stateHealth * utilState) - (hadEvent * 0.05); 
+                totalCost += cycleCost * discFactor; totalQALY += cycleUtil * discFactor;
+                stateDead += died; stateHealth = 1.0 - stateDead;
+            }
+            return { c: totalCost, e: totalQALY };
+        }
+
+        function runAdvancedPSA(data) {
+            const n = 10000;
+            const { costA, costA_se, costB, costB_se, utilGain, utilGain_se, threshold, orA, orB } = data;
+            let totalICER = 0; let totalNMB = 0; let ceCount = 0; let points = [];
+            let sumPosNMB = 0;
+            const rr = (orA && orB) ? (orA / orB) : 1.0;
+
+            for(let i=0; i<n; i++) {
+                const s_costA = Dist.gamma(costA, costA_se);
+                const s_costB = Dist.gamma(costB, costB_se);
+                const s_utilGain = Dist.beta(utilGain, utilGain_se);
+                
+                const resA = runMarkovTrace({ costAnnual: s_costA, costEvent: 500, utilState: 0.75 + s_utilGain, probEvent: Math.min(0.99, 0.30 * rr), probDeath: 0.01, discount: 0.035 });
+                const resB = runMarkovTrace({ costAnnual: s_costB, costEvent: 500, utilState: 0.75, probEvent: 0.30, probDeath: 0.01, discount: 0.035 });
+
+                const dCost = resA.c - resB.c;
+                const dQaly = resA.e - resB.e;
+                const safeQaly = Math.abs(dQaly) < 0.0001 ? 0.0001 : dQaly;
+                
+                const icer = dCost / safeQaly;
+                const nmb = (dQaly * threshold) - dCost;
+                
+                totalICER += icer; totalNMB += nmb;
+                if (nmb > 0) ceCount++;
+                sumPosNMB += Math.max(0, nmb);
+
+                if(i % 20 === 0) points.push({ x: dQaly, y: dCost, ce: nmb > 0 });
+            }
+            const meanNMB = totalNMB / n;
+            const evpi = (sumPosNMB / n) - Math.max(0, meanNMB);
+            return { meanICER: totalICER / n, meanNMB: meanNMB, probCE: (ceCount / n) * 100, evpi: evpi, points: points };
+        }
+    </script>
+
+    <!-- APP CORE -->
+    <script>
+        // Attribute Escaping
+        function escAttr(v) { return String(v ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+        // Int Clamp
+        function clampInt(x, min = 0) { const n = parseInt(x, 10); return Number.isFinite(n) ? Math.max(min, n) : min; }
+        
+        function ensureTrialIsValid(t) {
+            const out = {
+                id: String(t.id ?? 'UNKNOWN'), author: String(t.author ?? 'Unknown'),
+                year: clampInt(t.year ?? new Date().getFullYear(), 1900),
+                drug: String(t.drug ?? 't1'), ctrl: String(t.ctrl ?? 't4'),
+                ev_tx: clampInt(t.ev_tx, 0), n_tx: clampInt(t.n_tx, 0),
+                ev_ctrl: clampInt(t.ev_ctrl, 0), n_ctrl: clampInt(t.n_ctrl, 0),
+            };
+            out.ev_tx = Math.min(out.ev_tx, out.n_tx);
+            out.ev_ctrl = Math.min(out.ev_ctrl, out.n_ctrl);
+            return out;
+        }
+
+        const App = {
+            store: {
+                currentTopic: 'sickle',
+                // Persist State
+                load() {
+                    const saved = localStorage.getItem('oman_data_v39');
+                    if(saved) {
+                        try {
+                            const parsed = JSON.parse(saved);
+                            this.data = parsed;
+                            Object.keys(this.data || {}).forEach((k) => {
+                                const topic = this.data[k];
+                                if (topic?.trials) {
+                                    topic.trials = topic.trials.map(ensureTrialIsValid);
+                                }
+                            });
+                        } catch(e) { console.warn("Invalid save data"); }
+                    }
+                },
+                save() {
+                    localStorage.setItem('oman_data_v39', JSON.stringify(this.data));
+                },
+
+                data: {
+                    sickle: {
+                        name: "Sickle Cell Disease",
+                        title: "Sickle Cell Disease",
+                        headline: "The 'Success Paradox': Why improved survival is creating a costly chronic disease burden.",
+                        genetics: "Oman is home to the <strong>Arab-Indian Haplotype</strong> (approx 50% of cases), associated with naturally elevated HbF. This implies standard global guidelines (based on African haplotypes) may overestimate biologic benefit.",
+                        forecast: "As pediatric mortality nears zero, the adult SCD population will double by 2040. The burden will shift from acute admissions to complex multi-organ management. Without intervention, drug acquisition costs for this cohort could rise by 300%.",
+                        source: "ClinicalTrials.gov results (Serious AEs): <a href=\"https://clinicaltrials.gov/study/NCT01895361\" target=\"_blank\" rel=\"noopener\" class=\"text-accent-blue hover:underline\">NCT01895361</a>, <a href=\"https://clinicaltrials.gov/study/NCT03036813\" target=\"_blank\" rel=\"noopener\" class=\"text-accent-blue hover:underline\">NCT03036813</a>, <a href=\"https://clinicaltrials.gov/study/NCT01179217\" target=\"_blank\" rel=\"noopener\" class=\"text-accent-blue hover:underline\">NCT01179217</a>",
+                        stat1: "5.8%", stat_label1: "Carrier Rate", 
+                        stat2: "High", stat_label2: "Economic Risk",
+                        threshold: 15000, utility_gain: 0.05, utility_se: 0.01,
+                        effects: { t1: {name:"Crizanlizumab", cost:32000, cost_se:3000, or:0.55}, t2: {name:"Voxelotor", cost:28000, cost_se:2000, or:0.70}, t3: {name:"L-glutamine", cost:150, cost_se:20, or:0.56}, t4:{name:"Placebo", cost:0, cost_se:0, or:1.0} },
+                        trials: [
+                            { id: "NCT01895361", author: "SUSTAIN (SelG1)", year: 2016, drug: "t1", ctrl: "t4", ev_tx: 17, n_tx: 66, ev_ctrl: 17, n_ctrl: 62 },
+                            { id: "NCT03036813", author: "HOPE (Voxelotor 1500 mg)", year: 2019, drug: "t2", ctrl: "t4", ev_tx: 25, n_tx: 88, ev_ctrl: 23, n_ctrl: 91 },
+                            { id: "NCT01179217", author: "L-Glutamine Phase III", year: 2014, drug: "t3", ctrl: "t4", ev_tx: 118, n_tx: 151, ev_ctrl: 68, n_ctrl: 78 }
+                        ]
+                    },
+                    diabetes: {
+                        name: "Diabetes & Renal",
+                        title: "Diabetes Mellitus T2",
+                        headline: "A Metabolic Tsunami: 50% of cases remain undiagnosed until complications arise.",
+                        genetics: "Omani populations show high prevalence of TCF7L2 risk variants. Diabetic Nephropathy progression in this demographic often outpaces Western cohorts, requiring aggressive early intervention.",
+                        forecast: "Prevalence expected to hit 21% by 2030. The cost of End-Stage Renal Disease (ESRD) dialysis alone threatens to consume 15% of the total health budget.",
+                        source: "ClinicalTrials.gov results (Serious AEs): <a href=\"https://clinicaltrials.gov/study/NCT01131676\" target=\"_blank\" rel=\"noopener\" class=\"text-accent-blue hover:underline\">NCT01131676</a>, <a href=\"https://clinicaltrials.gov/study/NCT01179048\" target=\"_blank\" rel=\"noopener\" class=\"text-accent-blue hover:underline\">NCT01179048</a>, <a href=\"https://clinicaltrials.gov/study/NCT00790205\" target=\"_blank\" rel=\"noopener\" class=\"text-accent-blue hover:underline\">NCT00790205</a>",
+                        stat1: "14.5%", stat_label1: "Adult Prev", 
+                        stat2: "Rising", stat_label2: "ESRD Burden",
+                        threshold: 15000, utility_gain: 0.12, utility_se: 0.03,
+                        effects: { t1:{name:"Empagliflozin", cost:180, cost_se:30, or:0.55}, t2:{name:"Liraglutide", cost:900, cost_se:100, or:0.78}, t3:{name:"Sitagliptin", cost:100, cost_se:10, or:0.98}, t4:{name:"Placebo", cost:0, cost_se:0, or:1.0} },
+                        trials: [
+                            { id: "NCT01131676", author: "EMPA-REG (10 mg arm)", year: 2015, drug: "t1", ctrl: "t4", ev_tx: 876, n_tx: 2345, ev_ctrl: 988, n_ctrl: 2333 },
+                            { id: "NCT01179048", author: "LEADER (Liraglutide)", year: 2015, drug: "t2", ctrl: "t4", ev_tx: 2320, n_tx: 4668, ev_ctrl: 2354, n_ctrl: 4672 },
+                            { id: "NCT00790205", author: "TECOS (Sitagliptin)", year: 2015, drug: "t3", ctrl: "t4", ev_tx: 928, n_tx: 7266, ev_ctrl: 909, n_ctrl: 7274 }
+                        ]
+                    },
+                    cardio: {
+                        name: "Cardiovascular Prevention",
+                        title: "Cardiovascular Disease",
+                        headline: "The Silent Killer: CVD accounts for 33% of all mortality in Oman.",
+                        genetics: "Familial Hypercholesterolemia is under-diagnosed. Standard Framingham risk scores underestimate risk in young Omani males due to high metabolic syndrome prevalence.",
+                        forecast: "Shift from infectious to chronic disease burden continues. Without primary prevention (Polypill strategy), stroke and MI rates will double in the next decade.",
+                        source: "ClinicalTrials.gov results (Serious AEs): <a href=\"https://clinicaltrials.gov/study/NCT01764633\" target=\"_blank\" rel=\"noopener\" class=\"text-accent-blue hover:underline\">NCT01764633</a>, <a href=\"https://clinicaltrials.gov/study/NCT01663402\" target=\"_blank\" rel=\"noopener\" class=\"text-accent-blue hover:underline\">NCT01663402</a>, <a href=\"https://clinicaltrials.gov/study/NCT00239681\" target=\"_blank\" rel=\"noopener\" class=\"text-accent-blue hover:underline\">NCT00239681</a>",
+                        stat1: "33%", stat_label1: "Mortality", 
+                        stat2: "High", stat_label2: "Risk Factor",
+                        threshold: 15000, utility_gain: 0.08, utility_se: 0.02,
+                        effects: { t1:{name:"Evolocumab", cost:120, cost_se:20, or:0.79}, t2:{name:"Alirocumab", cost:40, cost_se:5, or:0.75}, t3:{name:"Rosuvastatin", cost:20, cost_se:5, or:0.85}, t4:{name:"Placebo", cost:0, cost_se:0, or:1.0} },
+                        trials: [
+                            { id: "NCT01764633", author: "FOURIER (Evolocumab)", year: 2016, drug: "t1", ctrl: "t4", ev_tx: 3410, n_tx: 13769, ev_ctrl: 3404, n_ctrl: 13756 },
+                            { id: "NCT01663402", author: "ODYSSEY OUTCOMES", year: 2018, drug: "t2", ctrl: "t4", ev_tx: 2202, n_tx: 9451, ev_ctrl: 2350, n_ctrl: 9443 },
+                            { id: "NCT00239681", author: "JUPITER (Rosuvastatin)", year: 2008, drug: "t3", ctrl: "t4", ev_tx: 1205, n_tx: 8869, ev_ctrl: 1216, n_ctrl: 8864 }
+                        ]
+                    },
+                    trauma: {
+                        name: "Traumatic Brain Injury",
+                        title: "Traumatic Brain Injury",
+                        headline: "Neurotrauma trials evaluate acute neuroprotective agents with mixed safety profiles.",
+                        genetics: "N/A (Injury).",
+                        forecast: "Current ClinicalTrials.gov evidence centers on acute-phase interventions and safety signals.",
+                        source: "ClinicalTrials.gov results (Serious AEs): <a href=\"https://clinicaltrials.gov/study/NCT00822900\" target=\"_blank\" rel=\"noopener\" class=\"text-accent-blue hover:underline\">NCT00822900</a>, <a href=\"https://clinicaltrials.gov/study/NCT01143064\" target=\"_blank\" rel=\"noopener\" class=\"text-accent-blue hover:underline\">NCT01143064</a>, <a href=\"https://clinicaltrials.gov/study/NCT00623506\" target=\"_blank\" rel=\"noopener\" class=\"text-accent-blue hover:underline\">NCT00623506</a>",
+                        stat1: "NCT00822900", stat_label1: "Key Trial", 
+                        stat2: "NCT01143064", stat_label2: "Key Trial",
+                        threshold: 30000, utility_gain: 0.03, utility_se: 0.01,
+                        effects: { t1:{name:"Progesterone", cost:500000, cost_se:50000, or:0.80}, t2:{name:"BHR-100", cost:10000, cost_se:2000, or:0.90}, t3:{name:"Pregnenolone", cost:50000, cost_se:10000, or:0.98}, t4:{name:"Placebo", cost:0, cost_se:0, or:1.0} },
+                        trials: [
+                            { id: "NCT00822900", author: "ProTECT III", year: 2014, drug: "t1", ctrl: "t4", ev_tx: 246, n_tx: 442, ev_ctrl: 251, n_ctrl: 440 },
+                            { id: "NCT01143064", author: "SYNAPSE", year: 2014, drug: "t2", ctrl: "t4", ev_tx: 224, n_tx: 596, ev_ctrl: 214, n_ctrl: 583 },
+                            { id: "NCT00623506", author: "Pregnenolone Trial", year: 2009, drug: "t3", ctrl: "t4", ev_tx: 0, n_tx: 11, ev_ctrl: 0, n_ctrl: 11 }
+                        ]
+                    }
+                },
+                get() { return this.data[this.currentTopic]; },
+                setTopic(t) { this.currentTopic = t; App.ui.renderStrategy(); App.engine.metaAnalyze(); App.engine.updateAll(); },
+                
+                addTrial(t) {
+                    this.data[this.currentTopic].trials.push(ensureTrialIsValid(t));
+                    this.save();
+                    App.engine.metaAnalyze();
+                    App.ui.renderDataStudio();
+                    App.router.go('data');
+                },
+                updateTrial(idx, field, val) {
+                    const trial = this.data[this.currentTopic].trials[idx];
+                    if(!trial) return;
+                    if(['id','author','drug','ctrl'].includes(field)) { trial[field] = String(val); }
+                    else { trial[field] = clampInt(val, 0); }
+                    
+                    this.data[this.currentTopic].trials[idx] = ensureTrialIsValid(trial);
+                    this.save();
+                    App.engine.metaAnalyze(); App.engine.updateAll();
+                },
+                updateParam(key, field, val) {
+                    const num = parseFloat(val);
+                    if(isNaN(num)) return;
+                    if(['or', 'low', 'high'].includes(field) && num <= 0) return;
+                    this.data[this.currentTopic].effects[key][field] = num;
+                    this.save();
+                    App.engine.updateAll();
+                },
+                updateGlobal(field, val) {
+                    const num = parseFloat(val);
+                    if(isNaN(num)) return;
+                    this.data[this.currentTopic][field] = num;
+                    this.save();
+                    App.engine.updateAll();
+                },
+                reset() { localStorage.removeItem('oman_data_v39'); location.reload(); }
+            },
+            
+            router: {
+                go(tab) {
+                    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+                    document.getElementById(`view-${tab}`).classList.add('active');
+                    
+                    document.querySelectorAll('.nav-item').forEach(el => {
+                        el.classList.remove('bg-accent-teal', 'text-black', 'font-bold');
+                        el.classList.add('text-zinc-400');
+                    });
+                    const btn = document.getElementById(`nav-${tab}`);
+                    if(btn) { btn.classList.remove('text-zinc-400'); btn.classList.add('bg-accent-teal', 'text-black', 'font-bold'); }
+                    
+                    if(tab === 'economics') App.engine.runSimulation();
+                    if(tab === 'synthesis') App.ui.renderNMA(); 
+                }
+            },
+
+            ui: {
+                toggleTheme() {
+                    const root = document.documentElement;
+                    if (root.classList.contains('dark')) { root.classList.remove('dark'); root.classList.add('light'); }
+                    else { root.classList.remove('light'); root.classList.add('dark'); }
+                },
+                setText(id, val) { const el = document.getElementById(id); if(el) el.innerText = val; },
+                setHTML(id, val) { const el = document.getElementById(id); if(el) el.innerHTML = val; },
+                
+                renderStrategy() {
+                    const d = App.store.get();
+                    ['sickle', 'diabetes', 'cardio', 'trauma'].forEach(t => {
+                        const el = document.getElementById(`card-${t}`);
+                        if(el) {
+                            el.classList.remove('active-card', 'border-accent-rose', 'border-accent-teal', 'border-accent-gold', 'border-accent-blue');
+                            el.classList.add('border-transparent');
+                        }
+                    });
+                    const active = document.getElementById(`card-${App.store.currentTopic}`);
+                    if(active) {
+                        active.classList.remove('border-transparent');
+                        active.classList.add('active-card');
+                        let color = 'border-accent-rose';
+                        if(App.store.currentTopic === 'diabetes') color = 'border-accent-teal';
+                        if(App.store.currentTopic === 'cardio') color = 'border-accent-gold';
+                        if(App.store.currentTopic === 'trauma') color = 'border-accent-blue';
+                        active.classList.add(color);
+                    }
+
+                    this.setText('ctx-title', d.title ?? '--');
+                    this.setHTML('ctx-desc', `
+                        <div class="space-y-3">
+                            <p class="text-sm font-semibold dark:text-white text-slate-900">${d.headline ?? ''}</p>
+                            <div class="text-sm text-zinc-400 leading-relaxed">${d.genetics ?? ''}</div>
+                        </div>
+                    `);
+                    
+                    this.setText('lbl-stat1', d.stat_label1 ?? 'Stat');
+                    this.setText('ctx-stat1', d.stat1 ?? '--');
+                    this.setText('lbl-stat2', d.stat_label2 ?? 'Stat');
+                    this.setText('ctx-stat2', d.stat2 ?? '--');
+                    this.setText('ctx-forecast', d.forecast ?? '--');
+                    this.setHTML('nma-source', d.source ?? '--');
+                },
+
+                renderDataStudio() {
+                    const d = App.store.get();
+                    const listEl = document.getElementById('trial-list-container');
+                    const paramsEl = document.getElementById('global-params');
+                    if (!listEl || !paramsEl) return;
+
+                    let html = `<div class="glass-panel p-6 rounded-xl"><div class="flex justify-between items-center mb-4"><h3 class="font-serif dark:text-white text-slate-900 text-lg">Included RCTs</h3><button onclick="App.store.addTrial({id:'NEW',author:'New Study',year:2025,drug:'t1',ctrl:'t4',ev_tx:0,n_tx:100,ev_ctrl:0,n_ctrl:100})" class="px-3 py-1 bg-zinc-800 text-white text-[10px] uppercase rounded hover:bg-zinc-700 transition-colors">+ Add Trial</button></div><div class="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">`;
+                    if(d.trials.length === 0) html += `<div class="text-zinc-500 text-sm italic">No individual trials loaded. Using aggregate estimates.</div>`;
+                    else {
+                        d.trials.forEach((t, i) => {
+                            const idRaw = String(t.id ?? '');
+                            const idSafe = escAttr(idRaw);
+                            const isNct = /^NCT\\d+/i.test(idRaw);
+                            const idLink = idRaw ? (isNct
+                                ? `<a href="https://clinicaltrials.gov/study/${idSafe}" target="_blank" rel="noopener" class="text-[9px] text-accent-blue hover:underline font-mono">${idSafe}</a>`
+                                : `<span class="text-[9px] text-zinc-500 font-mono">${idSafe}</span>`) : '';
+                            const drugOptions = Object.entries(d.effects).map(([k,v])=>`<option value="${k}" ${t.drug===k?'selected':''}>${v.name}</option>`).join('');
+                            const ctrlOptions = Object.entries(d.effects).map(([k,v])=>`<option value="${k}" ${t.ctrl===k?'selected':''}>${v.name}</option>`).join('');
+                            html += `
+                                <div class="glass-panel p-4 rounded text-xs grid md:grid-cols-12 gap-3 items-center border border-white/5 hover:border-white/20 transition-all">
+                                    <div class="md:col-span-3">
+                                        <input value="${escAttr(t.author)}" onchange="App.store.updateTrial(${i},'author',this.value)" class="w-full bg-transparent font-bold text-accent-teal mb-1 focus:text-white transition-colors">
+                                        <div class="flex gap-2">
+                                            <input value="${t.year}" onchange="App.store.updateTrial(${i},'year',this.value)" class="w-12 bg-transparent text-zinc-500 text-[10px]">
+                                            <input value="${escAttr(t.id)}" onchange="App.store.updateTrial(${i},'id',this.value)" class="flex-1 bg-transparent text-zinc-500 font-mono text-[10px]">
+                                        </div>
+                                        <div class="mt-1">${idLink}</div>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <label class="block text-[9px] text-zinc-500">Treatment</label>
+                                        <select onchange="App.store.updateTrial(${i},'drug',this.value)" class="w-full bg-transparent border-b border-zinc-700 dark:text-zinc-300 text-slate-800 focus:border-accent-teal">${drugOptions}</select>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <label class="block text-[9px] text-zinc-500">Control</label>
+                                        <select onchange="App.store.updateTrial(${i},'ctrl',this.value)" class="w-full bg-transparent border-b border-zinc-700 dark:text-zinc-300 text-slate-800 focus:border-accent-teal">${ctrlOptions}</select>
+                                    </div>
+                                    <div class="md:col-span-5 grid grid-cols-4 gap-2">
+                                        <div><label class="block text-[9px] text-zinc-500">Ev Tx</label><input type="number" value="${t.ev_tx}" onchange="App.store.updateTrial(${i},'ev_tx',this.value)" class="w-full bg-transparent border-b border-zinc-700 focus:border-accent-teal text-center"></div>
+                                        <div><label class="block text-[9px] text-zinc-500">N Tx</label><input type="number" value="${t.n_tx}" onchange="App.store.updateTrial(${i},'n_tx',this.value)" class="w-full bg-transparent border-b border-zinc-700 focus:border-accent-teal text-center"></div>
+                                        <div><label class="block text-[9px] text-zinc-500">Ev Ctrl</label><input type="number" value="${t.ev_ctrl}" onchange="App.store.updateTrial(${i},'ev_ctrl',this.value)" class="w-full bg-transparent border-b border-zinc-700 focus:border-accent-teal text-center"></div>
+                                        <div><label class="block text-[9px] text-zinc-500">N Ctrl</label><input type="number" value="${t.n_ctrl}" onchange="App.store.updateTrial(${i},'n_ctrl',this.value)" class="w-full bg-transparent border-b border-zinc-700 focus:border-accent-teal text-center"></div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+                    html += `</div></div>`;
+                    listEl.innerHTML = html;
+
+                    paramsEl.innerHTML = `
+                        <div class="glass-panel p-6 rounded-xl space-y-4">
+                            <h3 class="text-xs font-bold text-accent-gold uppercase tracking-widest">Global Parameters</h3>
+                            <div class="flex justify-between items-center"><label class="text-xs text-zinc-400">WTP Threshold</label><input type="number" step="1000" value="${d.threshold}" onchange="App.store.updateGlobal('threshold',this.value)" class="w-20 text-right border-b border-zinc-700 dark:text-white text-slate-900 focus:border-accent-gold"></div>
+                            <div class="flex justify-between items-center"><label class="text-xs text-zinc-400">Utility Gain</label><input type="number" step="0.01" value="${d.utility_gain}" onchange="App.store.updateGlobal('utility_gain',this.value)" class="w-20 text-right border-b border-zinc-700 dark:text-white text-slate-900 focus:border-accent-gold"></div>
+                            <div class="flex justify-between items-center"><label class="text-xs text-zinc-400">Utility SE</label><input type="number" step="0.001" value="${d.utility_se}" onchange="App.store.updateGlobal('utility_se',this.value)" class="w-20 text-right border-b border-zinc-700 dark:text-white text-slate-900 focus:border-accent-gold"></div>
+                        </div>
+                    `;
+                },
+
+                renderNMA() {
+                    const data = App.store.get();
+                    const keys = Object.keys(data.effects || {});
+                    const colors = ['text-accent-rose', 'text-zinc-400', 'text-accent-teal', 'text-zinc-600', 'text-accent-gold', 'text-accent-blue'];
+                    const results = App.engine.nmaResults || App.engine.metaAnalyze();
+                    const gridEl = document.getElementById('nma-grid');
+                    const rankingEl = document.getElementById('sucra-container');
+                    if (!gridEl || !rankingEl) return;
+
+                    if (!results || results.error) {
+                        const msg = results?.error || 'No NMA results available.';
+                        gridEl.innerHTML = `<div class="col-span-5 p-6 text-center text-xs font-mono text-accent-rose">${escAttr(msg)}</div>`;
+                        rankingEl.innerHTML = `<div class="text-xs text-zinc-500">Ranking unavailable.</div>`;
+                        return;
+                    }
+
+                    const pairKey = (a, b) => `${a}|${b}`;
+                    let gridHtml = `<div class="p-3 bg-zinc-900 text-zinc-500 font-mono text-[10px] uppercase">Vs.</div>`;
+                    keys.forEach((k, i) => {
+                        const name = escAttr(data.effects[k]?.name || k);
+                        gridHtml += `<div class="p-3 font-bold text-[10px] uppercase ${colors[i % colors.length]}">${name}</div>`;
+                    });
+
+                    keys.forEach((rowKey, r) => {
+                        const rowName = escAttr(data.effects[rowKey]?.name || rowKey);
+                        gridHtml += `<div class="p-3 font-bold text-[10px] uppercase ${colors[r % colors.length]} text-left flex items-center">${rowName}</div>`;
+                        keys.forEach((colKey) => {
+                            if (rowKey === colKey) {
+                                gridHtml += `<div class="p-3 bg-zinc-900 text-zinc-700 flex items-center justify-center">-</div>`;
+                                return;
+                            }
+                            const comp = results.league?.[pairKey(rowKey, colKey)];
+                            if (!comp || !Number.isFinite(comp.or)) {
+                                gridHtml += `<div class="p-3 bg-zinc-900 text-zinc-600 flex items-center justify-center">--</div>`;
+                                return;
+                            }
+                            const bg = comp.or < 1 ? 'bg-zinc-800 text-white' : 'bg-zinc-900 text-zinc-500';
+                            gridHtml += `
+                                <div class="p-3 ${bg} border border-black text-center font-mono font-bold flex flex-col items-center justify-center leading-tight">
+                                    <span>${comp.or.toFixed(2)}</span>
+                                    <span class="text-[9px] text-zinc-500">${comp.ci_low.toFixed(2)}-${comp.ci_high.toFixed(2)}</span>
+                                </div>
+                            `;
+                        });
+                    });
+                    gridEl.innerHTML = gridHtml;
+
+                    let rankingHtml = '';
+                    (results.rankings || []).forEach((r) => {
+                        const name = escAttr(data.effects[r.key]?.name || r.key);
+                        const score = Math.max(0, Math.min(100, Math.round(r.pScore)));
+                        rankingHtml += `
+                            <div class="flex items-center gap-2 text-xs">
+                                <div class="w-24 text-zinc-400 truncate">${name}</div>
+                                <div class="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
+                                    <div class="h-full bg-accent-teal" style="width:${score}%"></div>
+                                </div>
+                                <div class="w-10 text-right text-zinc-500">${score}</div>
+                            </div>
+                        `;
+                    });
+                    if (!rankingHtml) {
+                        rankingHtml = `<div class="text-xs text-zinc-500">Ranking unavailable.</div>`;
+                    }
+                    if (results.missingTreatments?.length) {
+                        const missing = results.missingTreatments.map(k => escAttr(data.effects[k]?.name || k)).join(', ');
+                        rankingHtml += `<div class="text-[10px] text-zinc-500 pt-3">No trial evidence: ${missing}</div>`;
+                    }
+                    rankingEl.innerHTML = rankingHtml;
+                }
+            },
+
+            engine: {
+                worker: null,
+                nmaResults: null,
+                init() {
+                    try {
+                        const blob = new Blob([document.getElementById('worker-code').textContent], {type: 'text/javascript'});
+                        this.worker = new Worker(window.URL.createObjectURL(blob));
+                        this.worker.onmessage = (e) => { if (e.data.type === 'SIMULATION_COMPLETE') this.renderResults(e.data.results); };
+                    } catch(e) { console.warn("Worker failed. Use fallback."); }
+                },
+                calcLogOR(t1Events, t1Total, t2Events, t2Total) {
+                    const a0 = t1Events, b0 = t1Total - t1Events;
+                    const c0 = t2Events, d0 = t2Total - t2Events;
+                    const useCC = (a0 === 0 || b0 === 0 || c0 === 0 || d0 === 0);
+                    const adj = useCC ? 0.5 : 0;
+                    const a = a0 + adj, b = b0 + adj, c = c0 + adj, d = d0 + adj;
+                    const logOR = Math.log((c * b) / (d * a));
+                    const variance = 1 / a + 1 / b + 1 / c + 1 / d;
+                    return { logOR, variance };
+                },
+                invertMatrix(A) {
+                    const n = A.length;
+                    const augmented = A.map((row, i) => {
+                        const out = [...row];
+                        for (let j = 0; j < n; j++) out.push(i === j ? 1 : 0);
+                        return out;
+                    });
+                    for (let i = 0; i < n; i++) {
+                        let maxRow = i;
+                        for (let k = i + 1; k < n; k++) {
+                            if (Math.abs(augmented[k][i]) > Math.abs(augmented[maxRow][i])) maxRow = k;
+                        }
+                        [augmented[i], augmented[maxRow]] = [augmented[maxRow], augmented[i]];
+                        const pivot = augmented[i][i];
+                        if (Math.abs(pivot) < 1e-12) throw new Error('Singular matrix');
+                        for (let j = 0; j < 2 * n; j++) augmented[i][j] /= pivot;
+                        for (let k = 0; k < n; k++) {
+                            if (k === i) continue;
+                            const factor = augmented[k][i];
+                            for (let j = 0; j < 2 * n; j++) augmented[k][j] -= factor * augmented[i][j];
+                        }
+                    }
+                    return augmented.map(row => row.slice(n));
+                },
+                normalCDF(z) {
+                    const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741;
+                    const a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
+                    const sign = z < 0 ? -1 : 1;
+                    const x = Math.abs(z) / Math.sqrt(2);
+                    const t = 1 / (1 + p * x);
+                    const y = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+                    return 0.5 * (1 + sign * y);
+                },
+                pickReference(arms, treatments, preferred) {
+                    if (preferred && treatments.includes(preferred)) return preferred;
+                    const byStudy = new Map();
+                    arms.forEach(a => {
+                        if (!byStudy.has(a.study)) byStudy.set(a.study, new Set());
+                        byStudy.get(a.study).add(a.treatment);
+                    });
+                    const scores = {};
+                    for (const set of byStudy.values()) {
+                        const list = Array.from(set);
+                        list.forEach((t) => {
+                            scores[t] = (scores[t] || 0) + (list.length - 1);
+                        });
+                    }
+                    return Object.entries(scores).sort((a, b) => b[1] - a[1])[0]?.[0] || treatments[0];
+                },
+                buildContrasts(arms, ref) {
+                    const byStudy = new Map();
+                    arms.forEach(a => {
+                        if (!byStudy.has(a.study)) byStudy.set(a.study, []);
+                        byStudy.get(a.study).push(a);
+                    });
+                    const contrasts = [];
+                    for (const studyArms of byStudy.values()) {
+                        if (studyArms.length < 2) continue;
+                        const baseline = studyArms.find(a => a.treatment === ref) || studyArms[0];
+                        studyArms.forEach((arm) => {
+                            if (arm === baseline || arm.treatment === baseline.treatment) return;
+                            const res = this.calcLogOR(baseline.events, baseline.n, arm.events, arm.n);
+                            if (!Number.isFinite(res.variance) || res.variance <= 0) return;
+                            contrasts.push({
+                                treatment1: baseline.treatment,
+                                treatment2: arm.treatment,
+                                effect: res.logOR,
+                                variance: res.variance
+                            });
+                        });
+                    }
+                    return contrasts;
+                },
+                buildAdjacency(treatments, contrasts) {
+                    const n = treatments.length;
+                    const matrix = Array(n).fill(null).map(() => Array(n).fill(0));
+                    contrasts.forEach(c => {
+                        const i = treatments.indexOf(c.treatment1);
+                        const j = treatments.indexOf(c.treatment2);
+                        if (i < 0 || j < 0) return;
+                        matrix[i][j] += 1;
+                        matrix[j][i] += 1;
+                    });
+                    return matrix;
+                },
+                isConnected(adjMatrix) {
+                    if (!adjMatrix.length) return false;
+                    const n = adjMatrix.length;
+                    const visited = new Array(n).fill(false);
+                    const stack = [0];
+                    while (stack.length) {
+                        const node = stack.pop();
+                        if (visited[node]) continue;
+                        visited[node] = true;
+                        for (let i = 0; i < n; i++) {
+                            if (adjMatrix[node][i] > 0 && !visited[i]) stack.push(i);
+                        }
+                    }
+                    return visited.every(Boolean);
+                },
+                computeNMA(data) {
+                    const effects = data.effects || {};
+                    const treatKeys = Object.keys(effects);
+                    const trials = data.trials || [];
+                    const arms = [];
+                    const warnings = [];
+
+                    trials.forEach((t, idx) => {
+                        const nTx = Number(t.n_tx || 0);
+                        const nCtrl = Number(t.n_ctrl || 0);
+                        if (nTx <= 0 || nCtrl <= 0) return;
+                        const baseId = String(t.id || t.author || `Study_${idx + 1}`);
+                        const studyId = `${baseId}-${idx + 1}`;
+                        const txKey = String(t.drug || 't1');
+                        const ctrlKey = String(t.ctrl || 't4');
+                        arms.push({ study: studyId, treatment: ctrlKey, events: t.ev_ctrl, n: nCtrl });
+                        arms.push({ study: studyId, treatment: txKey, events: t.ev_tx, n: nTx });
+                    });
+
+                    if (treatKeys.length < 2 || arms.length < 2) {
+                        return { error: 'Not enough trial data for NMA.', warnings, treatments: treatKeys };
+                    }
+
+                    const usedTreatments = [...new Set(arms.map(a => a.treatment))];
+                    if (usedTreatments.length < 2) {
+                        return { error: 'Network requires at least two treatments.', warnings, treatments: treatKeys };
+                    }
+
+                    const preferredRef = treatKeys.includes('t4') ? 't4' : null;
+                    const ref = this.pickReference(arms, usedTreatments, preferredRef);
+                    const treatments = [ref, ...treatKeys.filter(k => usedTreatments.includes(k) && k !== ref)];
+                    const missingTreatments = treatKeys.filter(k => !usedTreatments.includes(k));
+
+                    const contrasts = this.buildContrasts(arms, ref);
+                    if (contrasts.length < Math.max(1, treatments.length - 1)) {
+                        return { error: 'Insufficient contrasts to fit NMA.', warnings, treatments, missingTreatments, ref };
+                    }
+
+                    const adjacency = this.buildAdjacency(treatments, contrasts);
+                    if (!this.isConnected(adjacency)) {
+                        return { error: 'Network is not fully connected.', warnings, treatments, missingTreatments, ref };
+                    }
+
+                    const nParams = treatments.length - 1;
+                    const X = contrasts.map(c => {
+                        const row = new Array(nParams).fill(0);
+                        const idx1 = treatments.indexOf(c.treatment1);
+                        const idx2 = treatments.indexOf(c.treatment2);
+                        if (idx1 > 0) row[idx1 - 1] = -1;
+                        if (idx2 > 0) row[idx2 - 1] = 1;
+                        return row;
+                    });
+                    const y = contrasts.map(c => c.effect);
+                    const V = contrasts.map(c => c.variance);
+
+                    const XtWX = Array(nParams).fill(null).map(() => Array(nParams).fill(0));
+                    const XtWy = Array(nParams).fill(0);
+                    for (let i = 0; i < nParams; i++) {
+                        for (let j = 0; j < nParams; j++) {
+                            for (let k = 0; k < contrasts.length; k++) {
+                                XtWX[i][j] += X[k][i] * X[k][j] / V[k];
+                            }
+                        }
+                        for (let k = 0; k < contrasts.length; k++) {
+                            XtWy[i] += X[k][i] * y[k] / V[k];
+                        }
+                    }
+
+                    let varCov;
+                    try {
+                        varCov = this.invertMatrix(XtWX);
+                    } catch (e) {
+                        return { error: 'NMA matrix inversion failed.', warnings, treatments, missingTreatments, ref };
+                    }
+
+                    const d = new Array(nParams).fill(0);
+                    for (let i = 0; i < nParams; i++) {
+                        for (let j = 0; j < nParams; j++) d[i] += varCov[i][j] * XtWy[j];
+                    }
+
+                    const effectsByKey = {};
+                    effectsByKey[ref] = { logOR: 0, se: 0, or: 1, ci_low: 1, ci_high: 1 };
+                    treatments.slice(1).forEach((key, idx) => {
+                        const se = Math.sqrt(Math.max(0, varCov[idx][idx]));
+                        const logOR = d[idx];
+                        const ciLow = logOR - 1.96 * se;
+                        const ciHigh = logOR + 1.96 * se;
+                        effectsByKey[key] = {
+                            logOR,
+                            se,
+                            or: Math.exp(logOR),
+                            ci_low: Math.exp(ciLow),
+                            ci_high: Math.exp(ciHigh)
+                        };
+                    });
+                    missingTreatments.forEach((key) => { effectsByKey[key] = { missing: true }; });
+
+                    const nTreat = treatments.length;
+                    const fullVar = Array(nTreat).fill(null).map(() => Array(nTreat).fill(0));
+                    for (let i = 1; i < nTreat; i++) {
+                        for (let j = 1; j < nTreat; j++) {
+                            fullVar[i][j] = varCov[i - 1][j - 1];
+                        }
+                    }
+
+                    const effectsVec = treatments.map((key, idx) => (idx === 0 ? 0 : d[idx - 1]));
+                    const league = {};
+                    const pairKey = (a, b) => `${a}|${b}`;
+                    for (let i = 0; i < nTreat; i++) {
+                        for (let j = 0; j < nTreat; j++) {
+                            if (i === j) {
+                                league[pairKey(treatments[i], treatments[j])] = { self: true };
+                                continue;
+                            }
+                            const diff = effectsVec[i] - effectsVec[j];
+                            const varDiff = fullVar[i][i] + fullVar[j][j] - 2 * fullVar[i][j];
+                            const seDiff = Math.sqrt(Math.max(0.0001, varDiff));
+                            const ciLow = diff - 1.96 * seDiff;
+                            const ciHigh = diff + 1.96 * seDiff;
+                            league[pairKey(treatments[i], treatments[j])] = {
+                                or: Math.exp(diff),
+                                ci_low: Math.exp(ciLow),
+                                ci_high: Math.exp(ciHigh)
+                            };
+                        }
+                    }
+
+                    const rankings = [];
+                    for (let i = 0; i < nTreat; i++) {
+                        let sumP = 0;
+                        for (let j = 0; j < nTreat; j++) {
+                            if (i === j) continue;
+                            const diff = effectsVec[i] - effectsVec[j];
+                            const varDiff = fullVar[i][i] + fullVar[j][j] - 2 * fullVar[i][j];
+                            const seDiff = Math.sqrt(Math.max(0.0001, varDiff));
+                            const z = diff / seDiff;
+                            sumP += this.normalCDF(z);
+                        }
+                        rankings.push({ key: treatments[i], pScore: (sumP / (nTreat - 1)) * 100 });
+                    }
+                    rankings.sort((a, b) => b.pScore - a.pScore);
+
+                    return {
+                        ref,
+                        treatments,
+                        effects: effectsByKey,
+                        league,
+                        rankings,
+                        missingTreatments,
+                        warnings
+                    };
+                },
+                metaAnalyze() {
+                    const d = App.store.get();
+                    const results = this.computeNMA(d);
+                    this.nmaResults = results;
+                    if (!results || results.error) return results;
+                    Object.keys(d.effects || {}).forEach((k) => {
+                        const eff = results.effects?.[k];
+                        if (eff && !eff.missing && Number.isFinite(eff.or)) {
+                            d.effects[k].or = eff.or;
+                        }
+                    });
+                    return results;
+                },
+                updateAll() { App.ui.renderDataStudio(); App.ui.renderNMA(); },
+                runSimulation() {
+                    if(!this.worker) return;
+                    const data = App.store.get();
+                    const payload = {
+                        costA: data.effects.t1.cost, costA_se: data.effects.t1.cost_se,
+                        costB: data.effects.t3.cost, costB_se: data.effects.t3.cost_se,
+                        utilGain: data.utility_gain, utilGain_se: data.utility_se,
+                        threshold: data.threshold, orA: data.effects.t1.or, orB: data.effects.t3.or
+                    };
+                    this.worker.postMessage({ type: 'RUN_SIMULATION', payload });
+                },
+                renderResults(res) {
+                    App.ui.setText('icer-val', Math.round(res.meanICER).toLocaleString());
+                    App.ui.setText('nmb-val', Math.round(res.meanNMB).toLocaleString());
+                    
+                    const pop = 50000;
+                    const evpi = (Math.abs(res.evpi) * pop).toLocaleString(); // EVPI per person * Pop
+                    App.ui.setText('evpi-val', evpi);
+                    
+                    const prob = res.probCE.toFixed(1);
+                    const narrative = `At a WTP of <strong>${App.store.get().threshold} OMR</strong>, the intervention has a <strong>${prob}% probability</strong> of being cost-effective. ` + (prob > 50 ? "This supports adoption." : "This suggests rejection.");
+                    App.ui.setHTML('hta-narrative', narrative);
+                    
+                    const svg = document.getElementById('hta-plot');
+                    if(!svg) return;
+                    svg.innerHTML = '';
+                    
+                    const pts = res.points;
+                    const xVals = pts.map(p => p.x);
+                    const yVals = pts.map(p => p.y);
+                    
+                    const xMax = Math.max(0.5, ...xVals.map(Math.abs)) * 1.2;
+                    const yMax = Math.max(20000, ...yVals.map(Math.abs)) * 1.2;
+                    
+                    const W=600, H=400;
+                    const mapX = q => (W/2) + (q / xMax) * (W/2 - 20);
+                    const mapY = c => (H/2) - (c / yMax) * (H/2 - 20);
+
+                    let html = `<line x1="0" y1="${H/2}" x2="${W}" y2="${H/2}" stroke="#52525b" stroke-width="1" /><line x1="${W/2}" y1="0" x2="${W/2}" y2="${H}" stroke="#52525b" stroke-width="1" /><text x="${W-10}" y="${H/2 + 15}" fill="#71717a" text-anchor="end" font-size="10" font-family="monospace">ΔQALY</text><text x="${W/2 + 10}" y="20" fill="#71717a" text-anchor="start" font-size="10" font-family="monospace">ΔCost</text>`;
+                    const t = App.store.get().threshold;
+                    const tx1 = -xMax; const ty1 = -xMax * t;
+                    const tx2 = xMax; const ty2 = xMax * t;
+                    html += `<line x1="${mapX(tx1)}" y1="${mapY(ty1)}" x2="${mapX(tx2)}" y2="${mapY(ty2)}" stroke="#fbbf24" stroke-width="2" stroke-dasharray="4 4" opacity="0.6" />`;
+                    
+                    let pointsHtml = '';
+                    pts.forEach(p => {
+                        const cx = mapX(p.x); const cy = mapY(p.y);
+                        const color = p.ce ? '#2dd4bf' : '#fb7185';
+                        pointsHtml += `<circle cx="${cx}" cy="${cy}" r="2" fill="${color}" class="scatter-point" />`;
+                    });
+                    svg.innerHTML = html + pointsHtml;
+                }
+            }
+        };
+
+        // --- HORIZON SCANNER ---
+        const esc = (str) => { if(!str) return ''; return String(str).replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]); };
+
+        window.fetchTrials = async function() {
+            const query = document.getElementById('scan-query').value.trim();
+            const container = document.getElementById('scan-results');
+            container.innerHTML = `<div class="md:col-span-2 flex justify-center py-20"><div class="loader"></div></div>`;
+            try {
+                // Fixed API: query.cond -> query.term for wider search
+                const params = new URLSearchParams({
+                    "query.term": query,
+                    "filter.overallStatus": "RECRUITING,ACTIVE_NOT_RECRUITING",
+                    "pageSize": "4"
+                });
+                
+                const url = `https://clinicaltrials.gov/api/v2/studies?${params.toString()}`;
+                
+                // Check if running locally and warn about CORS
+                if (window.location.protocol === 'file:') {
+                    throw new Error("CORS blocked for file://. Run a local server (e.g., python -m http.server) and open http://localhost:8000.");
+                }
+
+                const res = await fetch(url);
+                if(!res.ok) {
+                    const txt = await res.text();
+                    throw new Error(`HTTP ${res.status}: ${txt.slice(0, 100)}`);
+                }
+                const data = await res.json();
+                let html = '';
+                if(data.studies) {
+                    data.studies.forEach(s => {
+                        const p = s.protocolSection;
+                        const status = p.statusModule?.overallStatus || 'UNKNOWN';
+                        const phase = p.designModule?.phases?.[0] || 'N/A';
+                        const title = p.identificationModule?.briefTitle || 'No Title';
+                        const nct = p.identificationModule?.nctId || '';
+                        const desc = p.descriptionModule?.briefSummary || "No abstract available.";
+                        const nctLink = nct
+                            ? `<a href="https://clinicaltrials.gov/study/${encodeURIComponent(nct)}" target="_blank" rel="noopener" class="text-[9px] text-accent-blue hover:underline font-mono">${esc(nct)}</a>`
+                            : `<span class="text-[9px] text-zinc-500 font-mono">No NCT ID</span>`;
+                        
+                        html += `
+                            <div class="glass-panel p-5 rounded-lg hover:border-white/20 transition-all group flex flex-col justify-between">
+                                <div>
+                                    <div class="flex justify-between mb-3"><span class="text-[9px] px-2 py-0.5 rounded border border-accent-green text-accent-green uppercase">${esc(status)}</span><span class="text-[9px] text-zinc-500 font-mono">${esc(phase)}</span></div>
+                                    <h4 class="font-bold text-sm mb-2 dark:text-white text-slate-900 line-clamp-2">${esc(title)}</h4>
+                                    <div class="mb-2">${nctLink}</div>
+                                    <p class="text-xs text-zinc-400 line-clamp-3 mb-4">${esc(desc)}</p>
+                                </div>
+                                <button data-nct="${escAttr(nct)}" data-title="${escAttr(title)}" onclick="importTrialFromButton(this)" class="w-full py-2 bg-zinc-800 hover:bg-accent-teal hover:text-black text-white text-[10px] uppercase tracking-widest rounded transition-colors">Import to Studio</button>
+                            </div>
+                        `;
+                    });
+                }
+                container.innerHTML = html || '<div class="md:col-span-2 text-center text-zinc-500">No trials found.</div>';
+            } catch(e) { 
+                container.innerHTML = `<div class="md:col-span-2 text-center text-accent-rose text-[10px] font-mono">Error: ${esc(e.message)}</div>`; 
+            }
+        }
+
+        window.importTrialFromButton = function(btn) {
+            if (!btn || !btn.dataset) return;
+            window.importTrial(btn.dataset.nct || '', btn.dataset.title || '');
+        };
+
+        window.importTrial = function(id, title) {
+            const safeTitle = String(title || 'Imported Trial');
+            const shortTitle = safeTitle.length > 18 ? `${safeTitle.slice(0, 18)}...` : safeTitle;
+            App.store.addTrial({
+                id: String(id || 'NCT'),
+                author: shortTitle,
+                year: new Date().getFullYear(),
+                drug: "t1",
+                ctrl: "t4",
+                ev_tx: 0,
+                n_tx: 100,
+                ev_ctrl: 0,
+                n_ctrl: 100
+            });
+        };
+
+        // Wrappers
+        window.switchTab = (tab) => App.router.go(tab);
+        window.setTopic = (topic) => App.store.setTopic(topic);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            App.store.load(); // Load saved
+            App.engine.init();
+            if(!document.documentElement.classList.contains('dark')) App.ui.toggleTheme();
+            App.store.setTopic('sickle');
+            App.router.go('strategy');
+        });
+    </script>
+</body>
+</html>
