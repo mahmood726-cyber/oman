@@ -27,6 +27,9 @@ desktop.ini
 *.swp
 *.swo
 
+# Logs (added during 2026-06-05 revival)
+*.log
+
 # Session checkpoints (see C:\Users\user\.claude\rules\rules.md)
 PROGRESS.md
 
