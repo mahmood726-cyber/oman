@@ -2,7 +2,7 @@
  * Node tests for the Oman Evidence OS engine. Run: node tests.js
  * Independently hand-computed expectations — NOT a re-derivation of the engine.
  */
-const { NMA, runMarkovTrace, mulberry32 } = require('./engine.js');
+const { NMA, runMarkovTrace, mulberry32, makeDist, runAdvancedPSA } = require('./engine.js');
 
 let pass = 0, fail = 0;
 function ok(name, cond, detail) {
@@ -153,6 +153,97 @@ const a = r1(), b = r1();
 ok('mulberry32 deterministic per seed', r2() === a && r2() === b);
 ok('mulberry32 in [0,1)', a >= 0 && a < 1 && b >= 0 && b < 1);
 ok('mulberry32 advances state', a !== b);
+
+// ---------------------------------------------------------------------------
+// computeNMA — 3-treatment STAR network (OMAN-3). Each active drug is compared
+// only against the control t4, so the WLS fit is block-diagonal and every
+// treatment's pooled logOR must equal its DIRECT logOR vs control.
+//   t1 vs t4: 20/100 vs 10/100 -> ln((20*90)/(80*10)) = ln(2.25)
+//   t2 vs t4: 30/100 vs 10/100 -> ln((30*90)/(70*10)) = ln(3.857142857)
+//   t3 vs t4: 15/100 vs 10/100 -> ln((15*90)/(85*10)) = ln(1.588235294)
+// ---------------------------------------------------------------------------
+const star = NMA.computeNMA({
+    effects: { t1: { name: 'A' }, t2: { name: 'B' }, t3: { name: 'C' }, t4: { name: 'Control' } },
+    trials: [
+        { id: 'S1', drug: 't1', ctrl: 't4', ev_tx: 20, n_tx: 100, ev_ctrl: 10, n_ctrl: 100 },
+        { id: 'S2', drug: 't2', ctrl: 't4', ev_tx: 30, n_tx: 100, ev_ctrl: 10, n_ctrl: 100 },
+        { id: 'S3', drug: 't3', ctrl: 't4', ev_tx: 15, n_tx: 100, ev_ctrl: 10, n_ctrl: 100 }
+    ]
+});
+ok('computeNMA(star) no error', !star.error, star.error);
+ok('computeNMA(star) ref = t4', star.ref === 't4');
+ok('computeNMA(star) t1 = direct ln(2.25)', close(star.effects.t1.logOR, Math.log((20 * 90) / (80 * 10)), 1e-9), 'got ' + star.effects.t1.logOR);
+ok('computeNMA(star) t2 = direct logOR', close(star.effects.t2.logOR, Math.log((30 * 90) / (70 * 10)), 1e-9), 'got ' + star.effects.t2.logOR);
+ok('computeNMA(star) t3 = direct logOR', close(star.effects.t3.logOR, Math.log((15 * 90) / (85 * 10)), 1e-9), 'got ' + star.effects.t3.logOR);
+ok('computeNMA(star) ref OR = 1', star.effects.t4.or === 1);
+// League table reciprocal consistency: OR(a|b) * OR(b|a) = 1.
+ok('computeNMA(star) league reciprocal t1/t2', close(star.league['t1|t2'].or * star.league['t2|t1'].or, 1, 1e-9), 'got ' + (star.league['t1|t2'].or * star.league['t2|t1'].or));
+ok('computeNMA(star) league reciprocal t2/t3', close(star.league['t2|t3'].or * star.league['t3|t2'].or, 1, 1e-9));
+// P-scores span 4 treatments, sum ~ 200 (mean rank stat) and t2 (largest OR) ranks first.
+ok('computeNMA(star) 4 rankings', star.rankings.length === 4);
+ok('computeNMA(star) rankings sorted desc', star.rankings[0].pScore >= star.rankings[1].pScore && star.rankings[1].pScore >= star.rankings[2].pScore);
+ok('computeNMA(star) t2 top-ranked (largest OR)', star.rankings[0].key === 't2', 'got ' + star.rankings[0].key);
+
+// Disconnected network guard: two disjoint edges {t1-t2} and {t3-t4} (OMAN-3).
+const discon = NMA.computeNMA({
+    effects: { t1: {}, t2: {}, t3: {}, t4: {} },
+    trials: [
+        { id: 'A1', drug: 't1', ctrl: 't2', ev_tx: 20, n_tx: 100, ev_ctrl: 10, n_ctrl: 100 },
+        { id: 'A2', drug: 't1', ctrl: 't2', ev_tx: 22, n_tx: 100, ev_ctrl: 11, n_ctrl: 100 },
+        { id: 'B1', drug: 't3', ctrl: 't4', ev_tx: 15, n_tx: 100, ev_ctrl: 10, n_ctrl: 100 }
+    ]
+});
+ok('computeNMA disconnected -> error', discon.error === 'Network is not fully connected.', 'got ' + discon.error);
+
+// ---------------------------------------------------------------------------
+// Dist samplers (OMAN-2) — seed-pinned Monte Carlo. Relaxed tolerances per the
+// stochastic-test rules; moments must land near their analytic targets.
+//   gamma(mean=100, se=10): E=100, sd=10.  beta(mean=0.30, se=0.05): E=0.30.
+// ---------------------------------------------------------------------------
+(function () {
+    const d = makeDist(mulberry32(999));
+    const N = 20000;
+    let sg = 0, sg2 = 0, sb = 0, sb2 = 0;
+    for (let i = 0; i < N; i++) {
+        const g = d.gamma(100, 10); sg += g; sg2 += g * g;
+        const b = d.beta(0.30, 0.05); sb += b; sb2 += b * b;
+    }
+    const gm = sg / N, gsd = Math.sqrt(sg2 / N - gm * gm);
+    const bm = sb / N, bsd = Math.sqrt(sb2 / N - bm * bm);
+    ok('Dist.gamma sample mean ~ 100', close(gm, 100, 1.0), 'got ' + gm);
+    ok('Dist.gamma sample sd ~ 10', Math.abs(gsd - 10) < 0.6, 'got ' + gsd);
+    ok('Dist.beta sample mean ~ 0.30', close(bm, 0.30, 0.006), 'got ' + bm);
+    ok('Dist.beta sample sd ~ 0.05', Math.abs(bsd - 0.05) < 0.006, 'got ' + bsd);
+})();
+// Degenerate-return branches must not throw or produce NaN.
+const dd = makeDist(mulberry32(1));
+ok('Dist.gamma se<=0 -> max(0,mean)', dd.gamma(100, 0) === 100 && dd.gamma(100, -1) === 100);
+ok('Dist.gamma mean<=0 -> max(0,mean)', dd.gamma(-5, 10) === 0 && dd.gamma(0, 10) === 0);
+ok('Dist.beta se<=0 -> mean', dd.beta(0.3, 0) === 0.3 && dd.beta(0.3, -1) === 0.3);
+ok('Dist.beta shape a<=0 -> mean', dd.beta(0.3, 0.5) === 0.3, 'got ' + dd.beta(0.3, 0.5));
+
+// ---------------------------------------------------------------------------
+// runAdvancedPSA — headline ICER must be the RATIO OF MEANS, not the mean of
+// per-iteration ratios (OMAN-1). Straddle input: A is both more costly and (on
+// average) more effective, so the correct ICER is strongly POSITIVE. The old
+// mean-of-ratios estimator returned a NEGATIVE value here (~ -10,900).
+// ---------------------------------------------------------------------------
+const psa = runAdvancedPSA({
+    costA: 200, costA_se: 30, costB: 150, costB_se: 20,
+    utilGain: 0.005, utilGain_se: 0.01, threshold: 15000, orA: 0.70, orB: 0.55
+}, { seed: 12345 });
+ok('runAdvancedPSA meanDCost > 0 (A costlier)', psa.meanDCost > 0, 'got ' + psa.meanDCost);
+ok('runAdvancedPSA meanDQaly > 0 (A more effective)', psa.meanDQaly > 0, 'got ' + psa.meanDQaly);
+ok('runAdvancedPSA ICER = ratio of means', close(psa.meanICER, psa.meanDCost / psa.meanDQaly, 1e-9), 'got ' + psa.meanICER);
+ok('runAdvancedPSA ICER positive (not mean-of-ratios)', psa.meanICER > 0, 'got ' + psa.meanICER);
+ok('runAdvancedPSA EVPI >= 0', psa.evpi >= 0, 'got ' + psa.evpi);
+ok('runAdvancedPSA probCE in [0,100]', psa.probCE >= 0 && psa.probCE <= 100, 'got ' + psa.probCE);
+// Determinism: identical seed -> identical headline.
+const psa2 = runAdvancedPSA({
+    costA: 200, costA_se: 30, costB: 150, costB_se: 20,
+    utilGain: 0.005, utilGain_se: 0.01, threshold: 15000, orA: 0.70, orB: 0.55
+}, { seed: 12345 });
+ok('runAdvancedPSA seed-deterministic', psa2.meanICER === psa.meanICER);
 
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail === 0 ? 0 : 1);

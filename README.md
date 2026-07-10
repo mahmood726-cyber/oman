@@ -62,15 +62,21 @@ browser and the Node tests share one source of truth.
 
 ```
 node tests.js
-# 47 passed, 0 failed
+# 74 passed, 0 failed
 ```
 
 Checks include normal-CDF reference points (Φ(0)=0.5, Φ(1.96)=0.975, symmetry),
 `calcLogOR` (logOR=ln 2.25, reciprocal variance, zero-cell continuity
 correction), `invertMatrix` (2×2 inverse, A·A⁻¹=I property, singular throw),
-network helpers (`isConnected`, `buildAdjacency`, `pickReference`), an
-end-to-end `computeNMA` single-contrast case (OR=2.25, SE=√0.17361, P-scores
-summing to 100), the deterministic Markov trace, and the seeded PRNG.
+network helpers (`isConnected`, `buildAdjacency`, `pickReference`), end-to-end
+`computeNMA` on both a single-contrast case and a 3-treatment star network
+(direct-logOR recovery, league-table reciprocal consistency, P-score ranking)
+plus the disconnected-network guard, the deterministic Markov trace, the seeded
+PRNG, and the probabilistic cost-effectiveness core (`makeDist` gamma/beta
+sampler moments and degenerate branches, and `runAdvancedPSA` reporting the ICER
+as a ratio of means). All numeric values in these tests (e.g. OR=2.25,
+SE=√0.17361) are hand-derived synthetic fixtures for verifying the math, not
+empirical effect estimates.
 
 ## Caveats
 

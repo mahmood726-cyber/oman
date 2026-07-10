@@ -37,6 +37,59 @@ function runMarkovTrace(params) {
     return { c: totalCost, e: totalQALY };
 }
 
+// Probabilistic-sensitivity-analysis samplers and driver. Extracted from the
+// inline Web-Worker block of index.html so the Monte-Carlo cost-effectiveness
+// core is a single, importable, testable source of truth. n and the RNG are
+// injectable so tests can pin a seed and a small draw count.
+//
+// Dist.gamma: Wilson-Hilferty cube-root normal approximation to a Gamma(k,theta)
+// with mean = k*theta, var = k*theta^2 = se^2. Degenerate return max(0,mean) when
+// se<=0 or mean<=0. Dist.beta: gamma-ratio construction of a Beta(a,b) matched to
+// (mean, se); degenerate return mean when se<=0 or the shape a<=0.
+function makeDist(rng) {
+    const Dist = {
+        randn: () => { const u1 = Math.max(1e-12, rng()); const u2 = rng(); return Math.sqrt(-2.0 * Math.log(u1)) * Math.sin(2.0 * Math.PI * u2); },
+        gamma: (mean, se) => { if (se <= 0 || mean <= 0) return Math.max(0, mean); const v = se * se; const k = (mean * mean) / v; const t = v / mean; const z = Dist.randn(); const val = k * Math.pow(1 - (1 / (9 * k)) + (z * Math.sqrt(1 / (9 * k))), 3); return Math.max(0, val * t); },
+        beta: (mean, se) => { if (se <= 0) return mean; const v = se * se; const m = Math.max(0.001, Math.min(0.999, mean)); const a = m * ((m * (1 - m) / v) - 1); const b = (1 - m) * ((m * (1 - m) / v) - 1); if (a <= 0) return mean; const ga = Dist.gamma(a, Math.sqrt(a)); const gb = Dist.gamma(b, Math.sqrt(b)); return ga / (ga + gb); }
+    };
+    return Dist;
+}
+
+// Monte-Carlo cost-effectiveness. Headline ICER is the RATIO OF MEANS
+// (mean(dCost)/mean(dQALY)) — NOT the mean of per-iteration ratios, which is a
+// biased estimator of a ratio (Jensen) and explodes / flips sign when incremental
+// QALYs straddle zero. NMB, CEAC (probCE) and EVPI are unbiased sample means.
+function runAdvancedPSA(data, opts) {
+    opts = opts || {};
+    const n = opts.n != null ? opts.n : 10000;
+    const rng = opts.rng || mulberry32(opts.seed != null ? opts.seed : 12345);
+    const Dist = makeDist(rng);
+    const { costA, costA_se, costB, costB_se, utilGain, utilGain_se, threshold, orA, orB } = data;
+    let totalDCost = 0, totalDQaly = 0, totalNMB = 0, ceCount = 0, sumPosNMB = 0;
+    const points = [];
+    const rr = (orA && orB) ? (orA / orB) : 1.0;
+    for (let i = 0; i < n; i++) {
+        const s_costA = Dist.gamma(costA, costA_se);
+        const s_costB = Dist.gamma(costB, costB_se);
+        const s_utilGain = Dist.beta(utilGain, utilGain_se);
+        const resA = runMarkovTrace({ costAnnual: s_costA, costEvent: 500, utilState: 0.75 + s_utilGain, probEvent: Math.min(0.99, 0.30 * rr), probDeath: 0.01, discount: 0.035 });
+        const resB = runMarkovTrace({ costAnnual: s_costB, costEvent: 500, utilState: 0.75, probEvent: 0.30, probDeath: 0.01, discount: 0.035 });
+        const dCost = resA.c - resB.c;
+        const dQaly = resA.e - resB.e;
+        const nmb = (dQaly * threshold) - dCost;
+        totalDCost += dCost; totalDQaly += dQaly; totalNMB += nmb;
+        if (nmb > 0) ceCount++;
+        sumPosNMB += Math.max(0, nmb);
+        if (i % 20 === 0) points.push({ x: dQaly, y: dCost, ce: nmb > 0 });
+    }
+    const meanDCost = totalDCost / n;
+    const meanDQaly = totalDQaly / n;
+    const meanNMB = totalNMB / n;
+    const evpi = (sumPosNMB / n) - Math.max(0, meanNMB);
+    const meanICER = Math.abs(meanDQaly) < 1e-12 ? Infinity : meanDCost / meanDQaly;
+    return { meanICER, meanNMB, probCE: (ceCount / n) * 100, evpi, points, meanDCost, meanDQaly };
+}
+
 // Frequentist NMA engine. Extracted verbatim from App.engine in oman.html;
 // methods call each other through `this`, so they are kept on a single object.
 const NMA = {
@@ -305,5 +358,5 @@ const NMA = {
 };
 
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { NMA, runMarkovTrace, mulberry32 };
+    module.exports = { NMA, runMarkovTrace, mulberry32, makeDist, runAdvancedPSA };
 }

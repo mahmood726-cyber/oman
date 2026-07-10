@@ -312,7 +312,11 @@
         function runAdvancedPSA(data) {
             const n = 10000;
             const { costA, costA_se, costB, costB_se, utilGain, utilGain_se, threshold, orA, orB } = data;
-            let totalICER = 0; let totalNMB = 0; let ceCount = 0; let points = [];
+            // Headline ICER = RATIO OF MEANS (mean(dCost)/mean(dQALY)), NOT the mean
+            // of per-iteration ICERs: averaging ratios is a biased estimator of a ratio
+            // and explodes / flips sign when incremental QALYs straddle zero. Kept in
+            // sync with engine.js::runAdvancedPSA (the tested source of truth).
+            let totalDCost = 0; let totalDQaly = 0; let totalNMB = 0; let ceCount = 0; let points = [];
             let sumPosNMB = 0;
             const rr = (orA && orB) ? (orA / orB) : 1.0;
 
@@ -320,26 +324,26 @@
                 const s_costA = Dist.gamma(costA, costA_se);
                 const s_costB = Dist.gamma(costB, costB_se);
                 const s_utilGain = Dist.beta(utilGain, utilGain_se);
-                
+
                 const resA = runMarkovTrace({ costAnnual: s_costA, costEvent: 500, utilState: 0.75 + s_utilGain, probEvent: Math.min(0.99, 0.30 * rr), probDeath: 0.01, discount: 0.035 });
                 const resB = runMarkovTrace({ costAnnual: s_costB, costEvent: 500, utilState: 0.75, probEvent: 0.30, probDeath: 0.01, discount: 0.035 });
 
                 const dCost = resA.c - resB.c;
                 const dQaly = resA.e - resB.e;
-                const safeQaly = Math.abs(dQaly) < 0.0001 ? 0.0001 : dQaly;
-                
-                const icer = dCost / safeQaly;
                 const nmb = (dQaly * threshold) - dCost;
-                
-                totalICER += icer; totalNMB += nmb;
+
+                totalDCost += dCost; totalDQaly += dQaly; totalNMB += nmb;
                 if (nmb > 0) ceCount++;
                 sumPosNMB += Math.max(0, nmb);
 
                 if(i % 20 === 0) points.push({ x: dQaly, y: dCost, ce: nmb > 0 });
             }
+            const meanDCost = totalDCost / n;
+            const meanDQaly = totalDQaly / n;
             const meanNMB = totalNMB / n;
             const evpi = (sumPosNMB / n) - Math.max(0, meanNMB);
-            return { meanICER: totalICER / n, meanNMB: meanNMB, probCE: (ceCount / n) * 100, evpi: evpi, points: points };
+            const meanICER = Math.abs(meanDQaly) < 1e-12 ? Infinity : meanDCost / meanDQaly;
+            return { meanICER: meanICER, meanNMB: meanNMB, probCE: (ceCount / n) * 100, evpi: evpi, points: points };
         }
     </script>
 
